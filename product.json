@@ -1,0 +1,47 @@
+{
+  "_id": "663a12eb2610038ed83ccb9b",
+  "name": "Bonn High Fibre Brown Bread",
+  "image_url": "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg",
+  "company_name": "Bonn",
+  "product_description": "Bonn Group is the best and popular bread brand in India.We have all types of bread products available at affordable prices for our customers.",
+  "number_of_variants": "3",
+  "subcategory_id": "663c73063974f7f6c9b6b48e",
+  "variants": [
+    {
+      "_id": "663a12eb2610038ed83ccb9b",
+      "image_urls": [
+        "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg",
+        "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg"
+      ],
+      "discount_available": true,
+      "discount_price": "45.00",
+      "max_retail_price": "50.00",
+      "discount_percentage": "10",
+      "units": "100",
+      "total_quantity": "90"
+    },
+    {
+      "_id": "663a12eb2610038ed83ccb9b",
+      "image_urls": [
+        "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg",
+        "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg"
+      ],
+      "discount_available": false,
+      "max_retail_price": "50.00",
+      "units": "100",
+      "total_quantity": "900"
+    },
+    {
+      "_id": "663a12eb2610038ed83ccb9b",
+      "image_urls": [
+        "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg",
+        "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg",
+        "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg"
+      ],
+      "discount_available": false,
+      "max_retail_price": "70.00",
+      "units": "150",
+      "total_quantity": "105"
+    }
+  ]
+}

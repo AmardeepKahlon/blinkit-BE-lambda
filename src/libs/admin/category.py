@@ -22,11 +22,25 @@ logger.setLevel(logging.INFO)
 
 # def category_handler(event, context):
 #   try:
-#     logger.info("Received event: " + json.dumps(event, indent=2))
+#     logger.info("Received event: %s", event)
     
-#     event_body_bytes = BytesIO(event['body'])
+#     if event['isBase64Encoded']:
+#       body = base64.b64decode(event['body'])
+#     else:
+#       body = event['body']
+    # print("body=====>", body)
+    # event_body_bytes = BytesIO(body)
+    
+    # if not isinstance(event_body_bytes, BytesIO):
+    #   logger.error("Event body is not in BytesIO format")
+    #   return {
+    #     "statusCode": 400,
+    #     "body": json.dumps({"errorMessage": "Invalid request body format"})
+    #   }
+    # event_body_bytes = BytesIO(event['body'].encode('utf-8'))
 #     form_data = MultiDict()
-#     parse_form_data(event_body_bytes, form_data)
+#     parse_form_data(BytesIO(body), form_data)
+#     print("form data =====>",form_data)
     
 #     if 'name' not in form_data or 'image' not in form_data:
 #       return {
@@ -150,7 +164,6 @@ def category_handler(event, context):
     
 def get_categories_handler(event, context):
   logger.info("Received event: " + json.dumps(event, indent=2))
-
   categories = db.categories.find({})
 
   category_list = list(categories)

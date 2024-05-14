@@ -36,6 +36,16 @@ def token_required(func):
     return func(event, context)
   return wrapper
 
+def token_required_is_admin(func):
+  @wraps(func)
+  def wrapper(event, context):
+    # print("event======>",event['body'])
+    is_valid, payload = verify_token_is_admin(event)
+    if not is_valid:
+      return payload
+    return func(event, context)
+  return wrapper
+
 def verify_token(event):
   auth_header = event.get('headers', {}).get('Authorization')
 
@@ -50,6 +60,30 @@ def verify_token(event):
   
   try:
     payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+    if payload.get('role') != 'USER':
+      return False, {"statusCode": 403, "body": json.dumps({"message": "Not authorized. User role required"})}
+    return True, payload
+  except jwt.ExpiredSignatureError:
+    return False, {"statusCode": 401, "body": json.dumps({"message": "Token expired"})}
+  except jwt.JWTError:
+    return False, {"statusCode": 401, "body": json.dumps({"message": "Invalid token"})}
+  
+def verify_token_is_admin(event):
+  auth_header = event.get('headers', {}).get('Authorization')
+
+  if not auth_header:
+    return False, {"statusCode": 401, "body": json.dumps({"message": "Missing token"})}
+
+  parts = auth_header.split()
+  if len(parts) != 2 or parts[0].lower() != 'bearer':
+    return False, {"statusCode": 401, "body": json.dumps({"message": "Invalid token format"})}
+
+  token = parts[1]
+  
+  try:
+    payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+    if payload.get('role') != 'ADMIN':
+      return False, {"statusCode": 403, "body": json.dumps({"message": "Not authorized. Admin role required"})}
     return True, payload
   except jwt.ExpiredSignatureError:
     return False, {"statusCode": 401, "body": json.dumps({"message": "Token expired"})}

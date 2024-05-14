@@ -66,28 +66,29 @@ user_schema = {
 
 category_schema = {
   "bsonType": "object",
-  "required": ["name", "image_url"],
+  "required": ["name", "image"],
   "properties": {
     "name": {
       "bsonType": "string",
       "description": "Name of the category"
     },
-    "image_url": {
+    "image": {
       "bsonType": "string",
       "description": "URL of the category image"
     }
-  }
+  },
+  "additionalProperties": False
 }
 
 update_category_schema = {
   "bsonType": "object",
-  "required": ["name", "image_url", "_id"],
+  "required": ["_id"],
   "properties": {
     "name": {
       "bsonType": "string",
       "description": "Name of the category"
     },
-    "image_url": {
+    "image": {
       "bsonType": "string",
       "description": "URL of the category image"
     },
@@ -95,18 +96,19 @@ update_category_schema = {
       "bsonType": "string",
       "description": "ID of the category"
     }
-  }
+  },
+  "additionalProperties": False
 }
 
 subcategory_schema = {
   "bsonType": "object",
-  "required": ["name", "image_url", "category_id"],
+  "required": ["name", "image", "category_id"],
   "properties": {
     "name": {
       "bsonType": "string",
       "description": "Name of the subcategory"
     },
-    "image_url": {
+    "image": {
       "bsonType": "string",
       "description": "URL of the category image"
     },
@@ -114,18 +116,19 @@ subcategory_schema = {
       "bsonType": "string",
       "description": "ID of the parent category"
     }
-  }
+  },
+  "additionalProperties": False
 }
 
 update_subcategory_schema = {
   "bsonType": "object",
-  "required": ["name", "image_url", "category_id", "_id"],
+  "required": ["_id"],
   "properties": {
     "name": {
       "bsonType": "string",
       "description": "Name of the subcategory"
     },
-    "image_url": {
+    "image": {
       "bsonType": "string",
       "description": "URL of the category image"
     },
@@ -137,18 +140,19 @@ update_subcategory_schema = {
       "bsonType": "string",
       "description": "ID of the subcategory"
     }
-  }
+  },
+  "additionalProperties": False
 }
 
 product_schema = {
   "bsonType": "object",
-  "required": ["name", "image_url", "company_name", "product_description", "number_of_variants", "subcategory_id"],
+  "required": ["name", "image", "company_name", "product_description", "number_of_variants", "subcategory_id", "variants"],
   "properties": {
     "name": {
       "bsonType": "string",
       "description": "Name of the product"
     },
-    "image_url": {
+    "image": {
       "bsonType": "string",
       "description": "URL of the category image"
     },
@@ -167,8 +171,13 @@ product_schema = {
     "subcategory_id": {
       "bsonType": "string",
       "description": "ID of the parent subcategory"
+    },
+    "variants": {
+      "bsonType": "array",
+      "description": "Variants of the product"
     }
-  }
+  },
+  "additionalProperties": False
 }
 
 update_product_schema = {
@@ -179,7 +188,7 @@ update_product_schema = {
       "bsonType": "string",
       "description": "Name of the product"
     },
-    "image_url": {
+    "image": {
       "bsonType": "string",
       "description": "URL of the category image"
     },
@@ -202,15 +211,20 @@ update_product_schema = {
     "_id": {
       "bsonType": "string",
       "description": "ID of the product"
+    },
+    "variants": {
+      "bsonType": "array",
+      "description": "Variants of the product"
     }
-  }
+  },
+  "additionalProperties": False
 }
 
 product_variant_schema = {
   "bsonType": "object",
-  "required": ["image_urls", "discount_available", "max_retail_price", "units", "total_quantity"],
+  "required": ["images", "discount_available", "max_retail_price", "units", "total_quantity"],
   "properties": {
-    "image_urls": {
+    "images": {
       "bsonType": "array",
       "description": "Image URLs of the product"
     },
@@ -238,7 +252,8 @@ product_variant_schema = {
       "bsonType": "string",
       "description": "Discount percentage of the product"
     }
-  }
+  },
+  "additionalProperties": False
 }
 
 update_product_variant_schema = {
@@ -277,5 +292,22 @@ update_product_variant_schema = {
       "bsonType": "string",
       "description": "ID of the product"
     }
-  }
+  },
+  "additionalProperties": False
+}
+
+add_product_variant_schema = {
+  "bsonType": "object",
+  "required": ["_id", "variants"],
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "description": "ID of the product"
+    },
+    "variants": {
+      "bsonType": "array",
+      "description": "Variants of the product"
+    }
+  },
+  "additionalProperties": False
 }

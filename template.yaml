@@ -14,12 +14,13 @@ Resources:
   #         title: Blinkit API
   #         version: "1.0"
   #       paths:
-  #         /admin/category:
+  #         /:
   #           post:
   #             x-amazon-apigateway-binary-media-types:
   #               - '*/*'
   #           consumes:
   #             - multipart/form-data
+  #             - application/json
   #           responses:
   #             "200":
   #               description: "Success response"
@@ -28,17 +29,14 @@ Resources:
   #               {
   #                 "body": "$input.body",
   #                 "headers": {
-  #                   # Define any custom headers here
-  #                   # For example, if you want to pass the Authorization header
   #                   "Authorization": "$input.params().header.get('Authorization')"
   #                 },
-  #                 "path": "$context.resourcePath",
-  #                 "httpMethod": "$context.httpMethod",
   #                 "isBase64Encoded": false
   #               }
-  #     BinaryMediaTypes:
-  #       - image/jpeg
-  #       - image/png
+  #             application/json: |
+  #               # Replace with your JSON request template if needed
+  #       BinaryMediaTypes:
+  #         - "*/*"
 
   UserHandlerFunction:
     Type: AWS::Serverless::Function
@@ -120,10 +118,8 @@ Resources:
           Properties:
             Path: /admin/category
             Method: post
-            # RestApiId: 
+            # RestApiId:
             #   Ref: AppApiGateway
-            # RequestTemplates:
-            #   multipart/form-data: '{"body": $input.body}'
 
   CreateSubcategoryHandlerFunction:
     Type: AWS::Serverless::Function
@@ -232,6 +228,7 @@ Resources:
     Properties:
       Handler: app.update_category_handler
       Runtime: python3.10
+      Timeout: 60
       CodeUri: ./src/
       Environment:
         Variables: 
@@ -252,6 +249,7 @@ Resources:
     Properties:
       Handler: app.update_subcategory_handler
       Runtime: python3.10
+      Timeout: 60
       CodeUri: ./src/
       Environment:
         Variables: 
@@ -307,11 +305,32 @@ Resources:
             Path: /admin/product/{product_id}
             Method: get
 
+  GetSubcategoryProductsHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.get_subcategory_products_handler
+      Runtime: python3.10
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        GetSpecificProductApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/subcategory/products
+            Method: post
+
   UpdateProductHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: app.update_product_handler
       Runtime: python3.10
+      Timeout: 60
       CodeUri: ./src/
       Environment:
         Variables: 
@@ -326,3 +345,63 @@ Resources:
           Properties:
             Path: /admin/product
             Method: put
+
+  DeleteProductHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.delete_product_handler
+      Runtime: python3.10
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        DeleteProductApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/product/{product_id}
+            Method: delete
+
+  DeleteCategoryHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.delete_category_handler
+      Runtime: python3.10
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        DeleteCategoryApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/category/{category_id}
+            Method: delete
+
+  DeleteSubcategoryHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.delete_subcategory_handler 
+      Runtime: python3.10
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        DeleteSubcategoryApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/subcategory/{subcategory_id}
+            Method: delete

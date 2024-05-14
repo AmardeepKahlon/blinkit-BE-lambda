@@ -8,7 +8,8 @@
   "subcategory_id": "663c73063974f7f6c9b6b48e",
   "variants": [
     {
-      "_id": "663a12eb2610038ed83ccb9b",
+      "_id": "663a12eb2610038ed8348djb",
+      "product_id": "663a12eb2610038ed83ccb9b",
       "image_urls": [
         "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg",
         "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg"
@@ -21,7 +22,8 @@
       "total_quantity": "90"
     },
     {
-      "_id": "663a12eb2610038ed83ccb9b",
+      "_id": "663a12eb2610038ed8348dcb",
+      "product_id": "663a12eb2610038ed83ccb9b",
       "image_urls": [
         "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg",
         "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg"
@@ -32,7 +34,8 @@
       "total_quantity": "900"
     },
     {
-      "_id": "663a12eb2610038ed83ccb9b",
+      "_id": "663a12eb3610038ed8347djb",
+      "product_id": "663a12eb2610038ed83ccb9b",
       "image_urls": [
         "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg",
         "https://res.cloudinary.com/ddzoadcde/image/upload/v1715237637/nm2pzl7ari0awh0w1elv.jpg",

@@ -8,7 +8,7 @@ from libs.utils import (
   token_required,
   token_required_is_admin
 )
-from libs import login, cart
+from libs import login
 from libs.user import user_create
 from libs.admin import admin_create
 from libs.admin import category as admin_category, subcategory as admin_subcategory, product as admin_product
@@ -113,14 +113,16 @@ def user_get_subcategory_products_handler(event, context):
 def user_get_specific_product_handler(event, context):
   return user_product.get_specific_product_handler(event, context)
 
-def create_cart_handler(event, context):
-  return cart.create_cart_handler(event, context)
+# @token_required
+# def create_cart_handler(event, context):
+#   return cart.create_cart_handler(event, context)
 
-def update_cart_handler(event, context):
-  return cart.update_cart_handler(event, context)
+# @token_required
+# def update_cart_handler(event, context):
+#   return cart.update_cart_handler(event, context)
 
-def delete_cart_handler(event, context):
-  return cart.delete_cart_handler(event, context)
+# def delete_cart_handler(event, context):
+#   return cart.delete_cart_handler(event, context)
 
 @token_required
 def create_order_handler(event, context):

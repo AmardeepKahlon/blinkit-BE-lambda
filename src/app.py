@@ -135,3 +135,7 @@ def create_order_handler(event, context):
 @token_required
 def get_order_handler(event, context):
   return order.get_order_handler(event, context)
+
+@token_required
+def get_orders_handler(event, context):
+  return order.get_orders_handler(event, context)

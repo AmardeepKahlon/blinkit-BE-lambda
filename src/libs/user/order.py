@@ -24,8 +24,12 @@ def order_handler(event, context):
       }
 
     order_data = json.loads(event['body'])
-    order_date = order_data['orderDate']
     order_items = order_data.get('orderItems', [])
+    if not order_items:
+      return {
+        "statusCode": 400,
+        "body": json.dumps({"errorMessage": "Order items are missing or empty"})
+      }
     payment_mode = order_data.get('paymentMode', 'Paid Online')
     delivery_charges = order_data.get('deliveryCharges', 0)
     handling_charges = order_data.get('handlingCharges', 0)
@@ -74,11 +78,10 @@ def order_handler(event, context):
     orders = db.orders
 
     logger.info("Order processing...")
-    # Calculate total price
     total_price = order_data['totalPrice']
 
-    # Add order status and calculate delivery time
-    order_status = 'Pending'  # You can set initial status as 'Pending'
+    order_status = 'Pending'
+    order_date = datetime.datetime.now(datetime.timezone.utc)
     delivery_time = order_date + datetime.timedelta(minutes=15)  # Example: 15 minutes from now
 
     order_document = {
@@ -100,7 +103,7 @@ def order_handler(event, context):
       'statusCode': 200,
       'body': json.dumps({
         'orderId': str(result.inserted_id),
-        'orderDate': order_date,
+        'orderDate': order_date.isoformat(),
         'orderItems': product_details,
         'paymentMode': payment_mode,
         'deliveryCharges': delivery_charges,
@@ -111,6 +114,52 @@ def order_handler(event, context):
         'deliveryTime': delivery_time.isoformat(),
       }),
     }
+  except Exception as e:
+    logger.error(f"An error occurred: {str(e)}")
+    return {
+      'statusCode': 500,
+      'body': json.dumps({'errorMessage': str(e)})
+    }
+    
+def get_order_handler(event, context):
+  try:
+    logger.info(f"Received event: {json.dumps(event, indent=2)}")
+
+    # Extract order ID from the event path parameters
+    if 'pathParameters' not in event or 'order_id' not in event['pathParameters']:
+      return {
+        "statusCode": 400,
+        "body": json.dumps({"errorMessage": "Order ID is missing"})
+      }
+
+    order_id = event['pathParameters']['order_id']
+    if not ObjectId.is_valid(order_id):
+      return {
+        "statusCode": 400,
+        "body": json.dumps({"errorMessage": "Invalid Order ID format"})
+      }
+
+    # Query the database for the order document
+    orders = db.orders
+    order_document = orders.find_one({"_id": ObjectId(order_id)})
+
+    if not order_document:
+      return {
+        "statusCode": 404,
+        "body": json.dumps({"errorMessage": "Order not found"})
+      }
+
+    # Convert ObjectId fields to strings for JSON serialization
+    order_document['_id'] = str(order_document['_id'])
+    for item in order_document['orderItems']:
+      item['productId'] = str(item['productId'])
+      item['variantId'] = str(item['variantId'])
+
+    return {
+      'statusCode': 200,
+      'body': json.dumps(order_document, default=str)  # Convert ObjectId to str
+    }
+
   except Exception as e:
     logger.error(f"An error occurred: {str(e)}")
     return {

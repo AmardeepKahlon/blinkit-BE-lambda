@@ -33,7 +33,7 @@ def token_required(func):
     is_valid, payload = verify_token(event)
     if not is_valid:
       return payload
-    return func(event, context)
+    return func(event, context, payload)
   return wrapper
 
 def token_required_is_admin(func):

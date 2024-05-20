@@ -14,7 +14,7 @@ from config.schemas import order_schema
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 secret_key = os.environ['SECRET_KEY']
-def order_handler(event, context):
+def order_handler(event, context, payload):
   try:
     logger.info(f"Received event: {json.dumps(event, indent=2)}")
 
@@ -31,6 +31,7 @@ def order_handler(event, context):
         "statusCode": 400,
         "body": json.dumps({"errorMessage": "Order items are missing or empty"})
       }
+    user_email = payload.get('email')
     payment_mode = order_data.get('paymentMode', 'Paid Online')
     delivery_charges = order_data.get('deliveryCharges', 0)
     handling_charges = order_data.get('handlingCharges', 0)
@@ -86,7 +87,7 @@ def order_handler(event, context):
     delivery_time = order_date + datetime.timedelta(minutes=15)  # Example: 15 minutes from now
 
     order_document = {
-        'user_email': user_email,
+      'user_email': user_email,
       'orderDate': order_date,
       'orderItems': product_details,
       'paymentMode': payment_mode,
@@ -123,9 +124,11 @@ def order_handler(event, context):
       'body': json.dumps({'errorMessage': str(e)})
     }
     
-def get_order_handler(event, context):
+def get_order_handler(event, context, payload):
   try:
     logger.info(f"Received event: {json.dumps(event, indent=2)}")
+    # print("Context Payload: ", context.payload)
+    print("Event Payload: ", payload)
 
     # Extract order ID from the event path parameters
     if 'pathParameters' not in event or 'order_id' not in event['pathParameters']:
@@ -169,51 +172,29 @@ def get_order_handler(event, context):
       'body': json.dumps({'errorMessage': str(e)})
     }
 
-def get_orders_handler(event,context):
-  # try:
-     auth_header = event.get('headers', {}).get('Authorization')
-
-     if not auth_header:
-        return False, {"statusCode": 401, "body": json.dumps({"message": "Missing token"})}
-
-     parts = auth_header.split()
-     if len(parts) != 2 or parts[0].lower() != 'bearer':
-        return False, {"statusCode": 401, "body": json.dumps({"message": "Invalid token format"})}    
-     token = parts[1]
-     print(token,'++++++++++++++++++++++++++++++++++++++++++>>>>>>>>>>>>>>')
-     user_email=get_user_id_from_token(token,secret_key)
-     print(user_email,'++++++++++++++++++++++++++++++++++++++++++++++++++====================')
-    #  logger.info("Received event: " + json.dumps(event, indent=2))
-     orders = db.orders.find({"user_email":user_email})
-    #  print('orders----------------------------------->>>>>>',json.dumps(orders,indent=2) )
-     order_list = list(orders)
-     return {
-      "statusCode": 200,
-      "body": json.loads(json.dumps(order_list, default=json_unknown_type_handler))
+def get_orders_handler(event, context, payload):
+  try:
+    user_email = payload.get('email')
+    if not user_email:
+      return {
+        "statusCode": 400,
+        "body": json.dumps({"errorMessage": "User email is missing from the payload"})
       }
-  # except Exception as e:
-  #   error_message = str(e)
-  #   return {
-  #     "statusCode": 500,
-  #     "body": json.dumps({"errorMessage": error_message})
-  #   }
+    
+    logger.info(f"Fetching orders for user: {user_email}")
+    
+    orders = db.orders.find({"user_email": user_email})
+    order_list = list(orders)
 
-def get_user_id_from_token(token, secret):
-    try:
-        # Decode the token
-        decoded_token = jwt.decode(token, secret, algorithms=["HS256"])
-        print(decoded_token,'_------------------------------>>>>>>>>>>>>.')
-        if decoded_token['role']=='USER':
-          return decoded_token.get('email')
-        else:
-          return None
-        
-        # Extract user ID from the decoded token
-    except jwt.ExpiredSignatureError:
-        # Token has expired
-        print("Token has expired")
-        return None
-    except jwt.JWTError:
-        # Token is invalid
-        print("Invalid token")
-        return None
+    return {
+      "statusCode": 200,
+      "body": json.dumps(order_list, default=json_unknown_type_handler)
+    }
+  except Exception as e:
+    error_message = str(e)
+    logger.error(f"An error occurred: {error_message}")
+    return {
+      "statusCode": 500,
+      "body": json.dumps({"errorMessage": error_message})
+    }
+

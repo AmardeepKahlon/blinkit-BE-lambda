@@ -3,9 +3,10 @@ import logging
 import json
 import cloudinary.uploader
 import base64
+import cgi
 from bson import ObjectId
-from werkzeug.formparser import parse_form_data
-from werkzeug.datastructures import MultiDict
+from urllib.parse import parse_qs
+from multipart import MultipartParser,MultipartError
 
 from libs.utils import (
   json_unknown_type_handler, 
@@ -20,80 +21,170 @@ from config.schemas import (
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# def category_handler(event, context):
-#   try:
-#     logger.info("Received event: %s", event)
-    
-#     if event['isBase64Encoded']:
-#       body = base64.b64decode(event['body'])
+# def category_formdata_handler(event, context):
+#     print("Received event:", json.dumps(event, indent=2))
+
+#     # Example handling for REST API Gateway
+#     if event.get('httpMethod') == 'POST' and event.get('body'):
+#         body = event['body']
+#         try:
+#             body = json.loads(body)
+#             name = body.get('name', '')
+#             email = body.get('email', '')
+#             print("Received body:", json.dumps(body, indent=2))
+            
+#         except json.JSONDecodeError:
+#             name = ''
+#             email = ''
 #     else:
-#       body = event['body']
-    # print("body=====>", body)
-    # event_body_bytes = BytesIO(body)
-    
-    # if not isinstance(event_body_bytes, BytesIO):
-    #   logger.error("Event body is not in BytesIO format")
-    #   return {
-    #     "statusCode": 400,
-    #     "body": json.dumps({"errorMessage": "Invalid request body format"})
-    #   }
-    # event_body_bytes = BytesIO(event['body'].encode('utf-8'))
-#     form_data = MultiDict()
-#     parse_form_data(BytesIO(body), form_data)
-#     print("form data =====>",form_data)
-    
-#     if 'name' not in form_data or 'image' not in form_data:
-#       return {
-#         "statusCode": 400,
-#         "body": json.dumps({"errorMessage": "Required form fields are missing"})
-#       }
-#     is_valid, error_response = validate_schema(form_data, category_schema)
-#     if not is_valid:
-#       return error_response
-      
-#     name = form_data.get('name')
-#     image = form_data.get('image')
-#     # decoded_image = base64.b64decode(encoded_image)
-      
-#     logger.info("Initializing the collection")
-#     categories = db.categories
-    
-#     existing_category = categories.find_one({"name": name})
-#     if existing_category:
-#       return {
-#         "statusCode": 400,
-#         "body": json.dumps({"errorMessage": "Category with this name already exists"})
-#       }
-#     try:
-#       upload_response = cloudinary.uploader.upload(image)
-#       image_url = upload_response['secure_url']
-#     except Exception as e:
-#       return {
-#         "statusCode": 500,
-#         "body": json.dumps({"message": "Failed to upload image to Cloudinary", "error": str(e)})
-#       }
-    
-#     category = {
-#       "name": name,
-#       "image_url": image_url
+#         name = ''
+#         email = ''
+
+#     # Create a response
+#     response = {
+#         "statusCode": 200,
+#         "headers": {
+#             "Content-Type": "application/json"
+#         },
+#         "body": json.dumps({
+#             "message": f"Received name: {name}, email: {email}"
+#         })
 #     }
 
-#     logger.info("Creating the category...")
-#     category_id = categories.insert_one(category).inserted_id
-#     logger.info(category_id)
-#     category = categories.find_one({"_id": category_id})
-#     logger.info(category)
-#     return {
-#       "statusCode": 200,
-#       "body": json.dumps(category, default=json_unknown_type_handler)
-#     }
-#   except Exception as e:
+#     return response
+def category_formdata_handler(event, context):
+    logger.info("Received event: %s", json.dumps(event, indent=2))
+
+    name = ''
+    email = ''
+
+    if event.get('httpMethod') == 'POST':
+        content_type = event['headers'].get('Content-Type', event['headers'].get('content-type'))
+        
+        if content_type and 'multipart/form-data' in content_type:
+            body = event['body']
+            
+            # if event['isBase64Encoded']:
+            #     # Decode body from base64
+            #     body = base64.b64decode(body)
+            
+            try:
+                # Extract boundary
+                # boundary = None
+                # parts = content_type.split("boundary=")
+                # if len(parts) > 1:
+                #     boundary = parts[1]
+                
+                # if boundary is None:
+                #     raise ValueError("Missing boundary in Content-Type header")
+                
+                # Create a fake environment
+                environ = {
+                    'REQUEST_METHOD': 'POST',
+                    'CONTENT_TYPE': content_type,
+                    'CONTENT_LENGTH': len(body)
+                }
+                
+                # Parse the multipart form data
+                fp = BytesIO(body.encode())
+                form = cgi.FieldStorage(fp=fp, environ=environ, keep_blank_values=True)
+                if 'name' in form:
+                    name = form['name'].value
+                if 'email' in form:
+                    email = form['email'].value
+
+                logger.info("Parsed name: %s, email: %s", name, email)
+            except Exception as e:
+                logger.error("Failed to parse multipart data: %s", str(e))
+        else:
+            logger.warning("Unsupported or missing Content-Type: %s", content_type)
+
+    response = {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps({
+            "message": f"Received name: {name}, email: {email}"
+        })
+    }
+
+    return response
+
+# def category_formdata_handler(event, context):
+    logger.info("Received event: %s", json.dumps(event, indent=2))
+
+    name = ''
+    email = ''
+
+    if event.get('httpMethod') == 'POST':
+        content_type = event['headers'].get('Content-Type', event['headers'].get('content-type'))
+        
+        if content_type and 'multipart/form-data' in content_type:
+            body = event['body']
+            
+            
+            if event['isBase64Encoded']:
+                body = base64.b64decode(body)
+                print('body-------------------->',body )
+            
+            try:
+                # Create a fake environment
+                environ = {
+                    'REQUEST_METHOD': 'POST',
+                    'CONTENT_TYPE': content_type,
+                    'CONTENT_LENGTH': len(body)
+                }
+                
+                # Parse the multipart form data
+                fp = BytesIO(body)
+                form = cgi.FieldStorage(fp=fp, environ=environ, keep_blank_values=True)
+
+                if 'name' in form:
+                    name = form['name'].value
+                if 'email' in form:
+                    email = form['email'].value
+
+                print("Parsed name------------------: %s, email----------: %s", name, email)
+            except Exception as e:
+                logger.error("Failed to parse multipart data: %s", str(e))
+        else:
+            logger.warning("Unsupported Content-Type: %s", content_type)
+
+    response = {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps({
+            "message": f"Received name: {name}, email: {email}"
+        })
+    }
+
+    return response
+# def category_formdata_handler(event, context):
+#   parser = StreamingFormDataParser(headers=event['params']['header'])
+#     # As the form has 2 fields: 1x Text & 1x File. 
+#     # Here we initiate two ValueTarget to hold values in memory.
+# try:
+#   if body in event:
+#         category_name = ValueTarget() 
+#         image = ValueTarget()
+#         parser.register("name", category_name)
+#         parser.register("image", image)
+#         mydata = base64.b64decode(event["body"])
+#         parser.data_received(mydata)
+#         logger.info(mydata,'------------------>here is my data')
+#         return {
+#          "statusCode": 200,
+#          "body": json.dumps(category, default=json_unknown_type_handler)
+#           }
+# except Exception as e:
 #     error_message = str(e)
 #     return {
 #         "statusCode": 500,
-#         "body": json.dumps({"errorMessage": error_message})
+#         "body": json.dumps({"errorMessage": "galat ho raha hai chacha"})
 #     }
-
 def category_handler(event, context):
   try:
     if 'body' in event and isinstance(event['body'], str):
@@ -178,6 +269,7 @@ def get_category_subcategories_handler(event, context):
     logger.info("Received event: " + json.dumps(event, indent=2))
 
     body = json.loads(event['body'])
+    print(body,'----------------------------------->')
 
     category_id = body.get('category_id')
 

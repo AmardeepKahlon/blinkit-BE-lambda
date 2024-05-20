@@ -13,7 +13,7 @@ logger.setLevel(logging.INFO)
 
 
 def get_products_handler(event, context):
-  logger.info("Received event: " + json.dumps(event, indent=2))
+  logger.info(f"Received event: {json.dumps(event, indent=2)}")
 
   products = db.products.find({})
 
@@ -30,7 +30,7 @@ def get_products_handler(event, context):
   }
   
 def get_specific_product_handler(event, context):
-  logger.info("Received event: " + json.dumps(event, indent=2))
+  logger.info(f"Received event: {json.dumps(event, indent=2)}")
 
   product_id = event.get("pathParameters", {}).get("product_id")
   if not product_id:

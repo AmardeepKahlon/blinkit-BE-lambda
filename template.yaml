@@ -274,7 +274,7 @@ Resources:
   OrderHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: app.order_handler
+      Handler: app.create_order_handler
       Runtime: python3.10
       Timeout: 60
       CodeUri: ./src/

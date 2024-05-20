@@ -311,3 +311,63 @@ add_product_variant_schema = {
   },
   "additionalProperties": False
 }
+
+order_schema = {
+    "bsonType": "object",
+    "required": ["orderDate", "orderItems", "paymentMode", "deliveryCharges", "handlingCharges", "deliveryAddress", "totalPrice", "orderStatus", "deliveryTime"],
+    "properties": {
+        "orderDate": {
+            "bsonType": "date",
+            "description": "Date of the order"
+        },
+        "orderItems": {
+            "bsonType": "array",
+            "items": {
+                "bsonType": "object",
+                "required": ["productId", "variantId", "quantity"],
+                "properties": {
+                    "productId": {
+                        "bsonType": "string",
+                        "description": "ID of the product"
+                    },
+                    "variantId": {
+                        "bsonType": "string",
+                        "description": "ID of the product variant"
+                    },
+                    "quantity": {
+                        "bsonType": "int",
+                        "description": "Quantity of the product"
+                    }
+                }
+            }
+        },
+        "paymentMode": {
+            "bsonType": "string",
+            "description": "Mode of payment"
+        },
+        "deliveryCharges": {
+            "bsonType": "double",
+            "description": "Charges for delivery"
+        },
+        "handlingCharges": {
+            "bsonType": "double",
+            "description": "Charges for handling"
+        },
+        "deliveryAddress": {
+          "bsonType": "string",
+          "description": "Delivery address of the order"
+        },
+        "totalPrice": {
+            "bsonType": "double",
+            "description": "Total price of the order"
+        },
+        "orderStatus": {
+            "bsonType": "string",
+            "description": "Status of the order"
+        },
+        "deliveryTime": {
+            "bsonType": "date",
+            "description": "Delivery time of the order"
+        }
+    }
+}

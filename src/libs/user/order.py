@@ -3,8 +3,12 @@ import json
 import logging
 
 from bson import ObjectId
-
+from libs.utils import (
+  json_unknown_type_handler, 
+  validate_schema
+)
 from config.db import db
+from config.schemas import order_schema
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -33,15 +37,31 @@ def order_handler(event, context):
       variant_id = order_item.get('variantId')
       quantity = order_item.get('quantity')
       product = db.products.find_one({"_id": ObjectId(product_id)})
+      if not product:
+        logger.error(f"Product not found for order item: {order_item}")
+        return {
+          "statusCode": 400,
+          "body": json.dumps({"errorMessage": "Product not found"})
+        }
+      logger.info("Product------------------------>", product)
+      print(product)
       variant = db.variants.find_one({"_id": ObjectId(variant_id)})
+      if not variant:
+        logger.error(f"Variant not found for order item: {order_item}")
+        return {
+          "statusCode": 400,
+          "body": json.dumps({"errorMessage": "Variant not found"})
+        }
+      logger.info("Variant------------------------>", variant)
+      print(variant)
+      
       if product and variant:
         product_details.append({
           'productId': product['_id'],
           'productName': product['name'],
           'variantId': variant['_id'],
-          'variantName': variant['name'],
           'quantity': quantity,
-          'price': variant['price']
+          'price': variant['max_retail_price']
         })
       else:
         logger.error(f"Product or variant not found for order item: {order_item}")
@@ -55,7 +75,7 @@ def order_handler(event, context):
 
     logger.info("Order processing...")
     # Calculate total price
-    total_price = sum(item['price'] * item['quantity'] for item in product_details)
+    total_price = order_data['totalPrice']
 
     # Add order status and calculate delivery time
     order_status = 'Pending'  # You can set initial status as 'Pending'

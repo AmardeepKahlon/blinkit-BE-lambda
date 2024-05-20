@@ -34,6 +34,13 @@ Resources:
   #                 "isBase64Encoded": false
   #               }
   #             application/json: |
+  #                 {
+  #                 "body": "$input.body",
+  #                 "headers": {
+  #                   "Authorization": "$input.params().header.get('Authorization')"
+  #                 },
+  #                 "isBase64Encoded": false
+  #                 }
   #               # Replace with your JSON request template if needed
   #     BinaryMediaTypes:
   #       - "*/*"
@@ -333,6 +340,7 @@ Resources:
           Properties:
             Path: /admin/category/subcategories
             Method: post
+            
 
   UpdateCategoryHandlerFunction:
     Type: AWS::Serverless::Function
@@ -522,3 +530,54 @@ Resources:
           Properties:
             Path: /admin/subcategory/{subcategory_id}
             Method: delete
+  CreateCategoryUsingFormDataHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.category_form_handler
+      Runtime: python3.10
+      Timeout: 60
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        CreateCategoryApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/categoryForm
+            Method: post
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      DefinitionBody:
+        openapi: "3.0.0"
+        info:   
+          title: Blinkit API
+          version: "1.0"
+        paths:
+          /:
+            post:
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                  multipart/form-data:
+                    schema:
+                      type: object
+                      properties:
+                        file:
+                          type: string
+                          format: binary
+              responses:
+                '200':
+                  description:'Success'
+            # RestApiId:
+            #   Ref: AppApiGateway
+  

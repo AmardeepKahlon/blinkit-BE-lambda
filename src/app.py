@@ -38,6 +38,10 @@ def category_handler(event, context):
   return admin_category.category_handler(event, context)
 
 @token_required_is_admin
+def category_form_handler(event, context):
+  return admin_category.category_formdata_handler(event, context)
+
+@token_required_is_admin
 def subcategory_handler(event, context):
   return admin_subcategory.subcategory_handler(event, context)
 

@@ -314,8 +314,12 @@ add_product_variant_schema = {
 
 order_schema = {
     "bsonType": "object",
-    "required": ["orderDate", "orderItems", "paymentMode", "deliveryCharges", "handlingCharges", "deliveryAddress", "totalPrice", "orderStatus", "deliveryTime"],
+    "required": ["user_email","orderDate", "orderItems", "paymentMode", "deliveryCharges", "handlingCharges", "deliveryAddress", "totalPrice", "orderStatus", "deliveryTime"],
     "properties": {
+      "user_email":{
+        "bsonType": "string",
+        "description": "ID of the user"
+      },
         "orderDate": {
             "bsonType": "date",
             "description": "Date of the order"

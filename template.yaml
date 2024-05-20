@@ -298,7 +298,26 @@ Resources:
           Properties:
             Path: /user/order
             Method: post
-
+  GetOrderHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.get_orders_handler
+      Runtime: python3.10
+      Timeout: 60
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        GetSpecificProductApiEvent:
+          Type: Api
+          Properties:
+            Path: /user/getorders
+            Method: get
   GetSubcategoriesHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:

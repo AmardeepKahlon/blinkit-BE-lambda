@@ -131,3 +131,7 @@ def user_get_specific_product_handler(event, context):
 @token_required
 def create_order_handler(event, context):
   return order.order_handler(event, context)
+
+@token_required
+def get_orders_handler(event, context):
+  return order.get_allOrders_handler(event, context)

@@ -550,11 +550,11 @@ Resources:
           Properties:
             Path: /admin/categoryForm
             Method: post
-    ApiGatewayApi:
-     Type: AWS::Serverless::Api
-     Properties:
-       StageName: prod
-       DefinitionBody:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      DefinitionBody:
         openapi: "3.0.0"
         info:   
           title: Blinkit API

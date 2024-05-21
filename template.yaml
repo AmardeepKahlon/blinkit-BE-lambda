@@ -510,6 +510,48 @@ Resources:
             Path: /admin/product
             Method: put
 
+  UpdateVariantHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.update_product_variant_handler
+      Runtime: python3.10
+      Timeout: 60
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        UpdateProductApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/product/variant
+            Method: put
+
+  AddVariantHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.add_product_variant_handler
+      Runtime: python3.10
+      Timeout: 60
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        UpdateProductApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/product/variant
+            Method: post
+
   DeleteProductHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -572,6 +614,7 @@ Resources:
           Properties:
             Path: /admin/subcategory/{subcategory_id}
             Method: delete
+
   CreateCategoryUsingFormDataHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -592,6 +635,112 @@ Resources:
           Properties:
             Path: /admin/categoryForm
             Method: post
+
+  GetCollectionHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.get_collection_handler
+      Runtime: python3.10
+      Timeout: 60
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        GetProductsApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/collection/{collection_id}
+            Method: get
+
+  GetCollectionsHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.get_collections_handler
+      Runtime: python3.10
+      Timeout: 60
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        GetProductsApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/collections
+            Method: get
+
+  CreateCollectionsHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.collection_handler
+      Runtime: python3.10
+      Timeout: 60
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        GetProductsApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/collection
+            Method: post
+
+  UpdateCollectionsHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.update_collection_handler
+      Runtime: python3.10
+      Timeout: 60
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        GetProductsApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/collection
+            Method: put
+
+  deleteCollectionsHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.delete_collection_handler
+      Runtime: python3.10
+      Timeout: 60
+      CodeUri: ./src/
+      Environment:
+        Variables: 
+          MONGODB_PWD: jPNxaeDm89o3eh5B
+          SECRET_KEY: dc8cd8d5a584b184e99e866f6893770c
+          CLOUD_NAME: ddzoadcde
+          API_KEY: 399475918152762
+          API_SECRET: ocy_ICUvVSeAjKV7Vh1Ba5TOi1I
+      Events:
+        GetProductsApiEvent:
+          Type: Api
+          Properties:
+            Path: /admin/collection/{collection_id}
+            Method: delete
+
   ApiGatewayApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -622,4 +771,3 @@ Resources:
                   description:'Success'
             # RestApiId:
             #   Ref: AppApiGateway
-  

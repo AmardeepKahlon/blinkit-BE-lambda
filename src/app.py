@@ -11,8 +11,18 @@ from libs.utils import (
 from libs import login
 from libs.user import user_create
 from libs.admin import admin_create
-from libs.admin import category as admin_category, subcategory as admin_subcategory, product as admin_product
-from libs.user import category as user_category, product as user_product, subcategory as user_subcategory, order
+from libs.admin import (
+  category as admin_category, 
+  subcategory as admin_subcategory, 
+  product as admin_product,
+  collections as admin_collections
+)
+from libs.user import (
+  category as user_category, 
+  product as user_product, 
+  subcategory as user_subcategory, 
+  order
+)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -139,3 +149,23 @@ def get_order_handler(event, context, payload):
 @token_required
 def get_orders_handler(event, context, payload):
   return order.get_orders_handler(event, context, payload)
+
+@token_required_is_admin
+def collection_handler(event, context):
+  return admin_collections.create_collection(event, context)
+
+@token_required_is_admin
+def get_collection_handler(event, context):
+  return admin_collections.get_collection(event, context)
+
+@token_required_is_admin
+def get_collections_handler(event, context):
+  return admin_collections.get_collections(event, context)
+
+@token_required_is_admin
+def update_collection_handler(event, context):
+  return admin_collections.update_collection(event, context)
+
+@token_required_is_admin
+def delete_collection_handler(event, context):
+  return admin_collections.delete_collection(event, context)

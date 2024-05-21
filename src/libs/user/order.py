@@ -4,6 +4,7 @@ import logging
 import os
 from jose import jwt
 from bson import ObjectId
+
 from libs.utils import (
   json_unknown_type_handler, 
   validate_schema
@@ -25,7 +26,10 @@ def order_handler(event, context, payload):
       }
 
     order_data = json.loads(event['body'])
-    order_items = order_data.get('orderItems', [])
+    is_valid, error_response = validate_schema(order_data, order_schema)
+    if not is_valid:
+      return error_response
+    order_items = order_data.get('order_items', [])
     if not order_items:
       return {
         "statusCode": 400,
@@ -33,15 +37,17 @@ def order_handler(event, context, payload):
       }
     user_email = payload.get('email')
     payment_mode = order_data.get('paymentMode', 'Paid Online')
-    delivery_charges = order_data.get('deliveryCharges', 0)
-    handling_charges = order_data.get('handlingCharges', 0)
-    delivery_address = order_data.get('deliveryAddress', '')
+    delivery_charges = order_data.get('delivery_charges', 0)
+    handling_charges = order_data.get('handling_charges', 0)
+    delivery_address = order_data.get('delivery_address')
     product_details = []
-    total_price = 0
+    total_quantity = 0
     for order_item in order_items:
-      product_id = order_item.get('productId')
-      variant_id = order_item.get('variantId')
-      quantity = order_item.get('quantity')
+      product_id = order_item.get('product_id')
+      variant_id = order_item.get('variant_id')
+      quantity = int(order_item.get('quantity'))
+      total_quantity += quantity
+
       product = db.products.find_one({"_id": ObjectId(product_id)})
       if not product:
         logger.error(f"Product not found for order item: {order_item}")
@@ -49,8 +55,7 @@ def order_handler(event, context, payload):
           "statusCode": 400,
           "body": json.dumps({"errorMessage": "Product not found"})
         }
-      # logger.info("Product------------------------>", product)
-      # print(product)
+
       variant = db.variants.find_one({"_id": ObjectId(variant_id)})
       if not variant:
         logger.error(f"Variant not found for order item: {order_item}")
@@ -58,63 +63,57 @@ def order_handler(event, context, payload):
           "statusCode": 400,
           "body": json.dumps({"errorMessage": "Variant not found"})
         }
-      # logger.info("Variant------------------------>", variant)
-      # print(variant)
-      
-      if product and variant:
-        product_details.append({
-          'productId': product['_id'],
-          'productName': product['name'],
-          'variantId': variant['_id'],
-          'quantity': quantity,
-          'price': variant['max_retail_price']
-        })
-      else:
-        logger.error(f"Product or variant not found for order item: {order_item}")
-        return {
-          "statusCode": 400,
-          "body": json.dumps({"errorMessage": "Product or variant not found"})
-        }
+
+      price = variant['discount_price'] if variant['discount_available'] == True else variant['max_retail_price']
+      product_details.append({
+        'product_id': str(product['_id']),
+        'product_name': product['name'],
+        'variant_id': str(variant['_id']),
+        'quantity': str(quantity),
+        'price': price
+      })
 
     logger.info("Initializing the collections...")
     orders = db.orders
 
     logger.info("Order processing...")
-    total_price = order_data['totalPrice']
+    total_price = order_data['total_price']
 
     order_status = 'Pending'
     order_date = datetime.datetime.now(datetime.timezone.utc)
-    delivery_time = order_date + datetime.timedelta(minutes=15)  # Example: 15 minutes from now
+    delivery_time = order_date + datetime.timedelta(minutes=15)
+
 
     order_document = {
       'user_email': user_email,
-      'orderDate': order_date,
-      'orderItems': product_details,
-      'paymentMode': payment_mode,
-      'deliveryCharges': delivery_charges,
-      'handlingCharges': handling_charges,
-      'deliveryAddress': delivery_address,
-      'totalPrice': total_price,
-      'orderStatus': order_status,
-      'deliveryTime': delivery_time
+      'order_date': order_date,
+      'order_items': product_details,
+      'payment_mode': payment_mode,
+      'delivery_charges': delivery_charges,
+      'handling_charges': handling_charges,
+      'delivery_address': delivery_address,
+      'total_price': total_price,
+      'total_quantity': total_quantity,
+      'order_status': order_status,
+      'delivery_time': delivery_time
     }
-    
+
     result = orders.insert_one(order_document)
     logger.info(f"Order inserted with ID: {result.inserted_id}")
 
     return {
       'statusCode': 200,
       'body': json.dumps({
-        'orderId': str(result.inserted_id),
-        'orderDate': order_date.isoformat(),
-        'orderItems': product_details,
-        'paymentMode': payment_mode,
-        'deliveryCharges': delivery_charges,
-        'handlingCharges': handling_charges,
-        'deliveryAddress': delivery_address,
-        'totalPrice': total_price,
-        'orderStatus': order_status,
-        'deliveryTime': delivery_time.isoformat(),
+        'order_id': str(result.inserted_id),
+        'order_date': order_date.isoformat(),
+        'order_items': product_details,
+        'payment_mode': payment_mode,
+        'delivery_charges': delivery_charges,
+        'handling_charges': handling_charges,
+        'delivery_address': delivery_address,
+        'total_price': total_price,
+        'order_status': order_status,
+        'delivery_time': delivery_time.isoformat(),
       }),
     }
   except Exception as e:
@@ -154,15 +153,14 @@ def get_order_handler(event, context, payload):
         "body": json.dumps({"errorMessage": "Order not found"})
       }
 
-    # Convert ObjectId fields to strings for JSON serialization
     order_document['_id'] = str(order_document['_id'])
-    for item in order_document['orderItems']:
-      item['productId'] = str(item['productId'])
-      item['variantId'] = str(item['variantId'])
+    for item in order_document['order_items']:
+      item['product_id'] = str(item['product_id'])
+      item['variant_id'] = str(item['variant_id'])
 
     return {
       'statusCode': 200,
-      'body': json.dumps(order_document, default=str)  # Convert ObjectId to str
+      'body': json.dumps(order_document, default=str)
     }
 
   except Exception as e:
@@ -172,7 +170,7 @@ def get_order_handler(event, context, payload):
       'body': json.dumps({'errorMessage': str(e)})
     }
 
-def get_orders_handler(event, context, payload):
+def get_orders_handler(event, context, payload):  # sourcery skip: extract-method
   try:
     user_email = payload.get('email')
     if not user_email:
@@ -188,7 +186,7 @@ def get_orders_handler(event, context, payload):
 
     return {
       "statusCode": 200,
-      "body": json.dumps(order_list, default=json_unknown_type_handler)
+      "body": json.dumps(order_list, default=str)
     }
   except Exception as e:
     error_message = str(e)

@@ -14,8 +14,8 @@ logger.setLevel(logging.INFO)
 
 
 def login_handler(event, context):
-  logger.info("Received event: " + json.dumps(event, indent=2))
-  
+  logger.info(f"Received event: {json.dumps(event, indent=2)}")
+
   try:
     body = json.loads(event.get("body", "{}"))
   except json.JSONDecodeError:
@@ -23,10 +23,10 @@ def login_handler(event, context):
       "statusCode": 400,
       "body": json.dumps({"message": "Invalid JSON format in request body"})
     }
-    
+
   email = body.get("email", None)
   password = body.get("password", None)
-  
+
   logger.info("Processing login...")
   if not email or not password:
     return {

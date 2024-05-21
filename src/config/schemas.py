@@ -313,65 +313,123 @@ add_product_variant_schema = {
 }
 
 order_schema = {
-    "bsonType": "object",
-    "required": ["user_email","orderDate", "orderItems", "paymentMode", "deliveryCharges", "handlingCharges", "deliveryAddress", "totalPrice", "orderStatus", "deliveryTime"],
-    "properties": {
-      "user_email":{
-        "bsonType": "string",
-        "description": "ID of the user"
-      },
-        "orderDate": {
-            "bsonType": "date",
-            "description": "Date of the order"
-        },
-        "orderItems": {
-            "bsonType": "array",
-            "items": {
-                "bsonType": "object",
-                "required": ["productId", "variantId", "quantity"],
-                "properties": {
-                    "productId": {
-                        "bsonType": "string",
-                        "description": "ID of the product"
-                    },
-                    "variantId": {
-                        "bsonType": "string",
-                        "description": "ID of the product variant"
-                    },
-                    "quantity": {
-                        "bsonType": "int",
-                        "description": "Quantity of the product"
-                    }
-                }
-            }
-        },
-        "paymentMode": {
+  "bsonType": "object",
+  "required": ["order_items", "payment_mode", "delivery_charges", "handling_charges", "delivery_address", "total_price"],
+  "properties": {
+    "order_items": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "object",
+        "required": ["product_id", "variant_id", "quantity"],
+        "properties": {
+          "product_id": {
             "bsonType": "string",
-            "description": "Mode of payment"
-        },
-        "deliveryCharges": {
-            "bsonType": "double",
-            "description": "Charges for delivery"
-        },
-        "handlingCharges": {
-            "bsonType": "double",
-            "description": "Charges for handling"
-        },
-        "deliveryAddress": {
-          "bsonType": "string",
-          "description": "Delivery address of the order"
-        },
-        "totalPrice": {
-            "bsonType": "double",
-            "description": "Total price of the order"
-        },
-        "orderStatus": {
+            "description": "ID of the product"
+          },
+          "variant_id": {
             "bsonType": "string",
-            "description": "Status of the order"
+            "description": "ID of the product variant"
+          },
+          "quantity": {
+            "bsonType": "string",
+            "description": "Quantity of the product"
+          }
         },
-        "deliveryTime": {
-            "bsonType": "date",
-            "description": "Delivery time of the order"
-        }
+        "additionalProperties": False
+      }
+    },
+    "payment_mode": {
+      "bsonType": "string",
+      "description": "Mode of payment"
+    },
+    "delivery_charges": {
+      "bsonType": "string",
+      "description": "Charges for delivery"
+    },
+    "handling_charges": {
+      "bsonType": "string",
+      "description": "Charges for handling"
+    },
+    "delivery_address": {
+      "bsonType": "string",
+      "description": "Delivery address of the order"
+    },
+    "total_price": {
+      "bsonType": "double",
+      "description": "Total price of the order"
     }
+  },
+  "additionalProperties": False
+}
+
+collection_schema = {
+  "bsonType": "object",
+  "required": ["collection_name", "collection_items", "show_collection"],
+  "properties": {
+    "collection_items": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "object",
+        "required": ["product_id", "variant_id"],
+        "properties": {
+          "product_id": {
+            "bsonType": "string",
+            "description": "ID of the product"
+          },
+          "variant_id": {
+            "bsonType": "string",
+            "description": "ID of the product variant"
+          }
+        },
+        "additionalProperties": False
+      }
+    },
+    "collection_name": {
+      "bsonType": "string",
+      "description": "Name of collection"
+    },
+    "show_collection": {
+      "bsonType": "bool",
+      "description": "Will collection be shown"
+    }
+  },
+  "additionalProperties": False
+}
+
+update_collection_schema = {
+  "bsonType": "object",
+  "required": ["_id"],
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "description": "ID of the product"
+    },
+    "collection_items": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "object",
+        "required": ["product_id", "variant_id"],
+        "properties": {
+          "product_id": {
+            "bsonType": "string",
+            "description": "ID of the product"
+          },
+          "variant_id": {
+            "bsonType": "string",
+            "description": "ID of the product variant"
+          }
+        },
+        "additionalProperties": False
+      }
+    },
+    "collection_name": {
+      "bsonType": "string",
+      "description": "Name of collection"
+    },
+    "show_collection": {
+      "bsonType": "bool",
+      "description": "Will collection be shown"
+    }
+  },
+  "additionalProperties": False
 }

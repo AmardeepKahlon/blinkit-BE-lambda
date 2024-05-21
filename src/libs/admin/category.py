@@ -100,13 +100,13 @@ def category_formdata_handler(event, context):
             logger.warning("Unsupported or missing Content-Type: %s", content_type)
 
     response = {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "body": json.dumps({
-            "message": f"Received name: {name}, email: {email}"
-        })
+      "statusCode": 200,
+      "headers": {
+          "Content-Type": "application/json"
+      },
+      "body": json.dumps({
+          "message": f"Received name: {name}, email: {email}"
+      })
     }
 
     return response

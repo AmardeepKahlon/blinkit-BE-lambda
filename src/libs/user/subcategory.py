@@ -11,7 +11,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def get_subcategories_handler(event, context):
-  logger.info("Received event: " + json.dumps(event, indent=2))
+  logger.info(f"Received event: {json.dumps(event, indent=2)}")
 
   subcategories = db.subcategories.find({})
 
@@ -24,7 +24,7 @@ def get_subcategories_handler(event, context):
   
 def get_subcategory_products_handler(event, context):
   try:
-    logger.info("Received event: " + json.dumps(event, indent=2))
+    logger.info(f"Received event: {json.dumps(event, indent=2)}")
 
     body = json.loads(event['body'])
 

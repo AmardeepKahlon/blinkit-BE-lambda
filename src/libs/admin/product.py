@@ -15,7 +15,7 @@ from config.schemas import (
   product_schema, 
   product_variant_schema, 
   update_product_schema,
-  add_product_variant_schema
+  update_product_variant_schema
 )
 
 logger = logging.getLogger()
@@ -437,7 +437,7 @@ def update_product_variant_handler(event, context):
         "body": json.dumps({"errorMessage": "Request body is missing or empty"})
       }
 
-    is_valid, error_response = validate_schema(body, add_product_variant_schema)
+    is_valid, error_response = validate_schema(body, update_product_variant_schema)
     if not is_valid:
       return error_response
     selected_product = db.subcategories.find_one({"_id": product_data["_id"]})

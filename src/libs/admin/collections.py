@@ -1,22 +1,16 @@
 import json
 import logging
 from bson import ObjectId
-from pymongo import MongoClient
 
 from config.db import db
+from libs.utils import validate_schema
+from config.schemas import collection_schema, update_collection_schema
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def get_creation_collection():
-  return db.creation
-def ensure_creation_collection():
-  collection = get_creation_collection()
-  # Create any required indexes here, for example:
-  # collection.create_index([("field_name", pymongo.ASCENDING)], unique=True)
-  logger.info("Ensured creation collection exists.")
 
-def create_creation(event, context):
+def create_collection(event, context):
   try:
     logger.info(f"Received event: {json.dumps(event, indent=2)}")
 
@@ -25,16 +19,27 @@ def create_creation(event, context):
           "statusCode": 400,
           "body": json.dumps({"errorMessage": "Request body is missing or empty"})
         }
-
-    creation_data = json.loads(event['body'])
-    collection = get_creation_collection()
+    collection_data = json.loads(event['body'])
     
-    result = collection.insert_one(creation_data)
-    logger.info(f"Creation document inserted with ID: {result.inserted_id}")
+    is_valid, error_response = validate_schema(collection_data, collection_schema)
+    if not is_valid:
+      return error_response
+    
+    logger.info("Initializing the collections...")
+    collection = db.collections
+    
+    if existing_collection := collection.find_one({"collection_name": collection_data.get("collection_name")}):
+      return {
+        "statusCode": 400,
+        "body": json.dumps({"errorMessage": "Collection with this name already exists"})
+      }
+    
+    result = collection.insert_one(collection_data)
+    logger.info(f"Collection document inserted with ID: {result.inserted_id}")
 
     return {
       'statusCode': 200,
-      'body': json.dumps({'creationId': str(result.inserted_id)})
+      'body': json.dumps({'message': 'Document created successfully'})
     }
   except Exception as e:
     logger.error(f"An error occurred: {str(e)}")
@@ -43,12 +48,15 @@ def create_creation(event, context):
       'body': json.dumps({'errorMessage': str(e)})
     }
       
-def read_creation(event, context):
+def get_collection(event, context):
   try:
-    creation_id = event['pathParameters']['id']
-    collection = get_creation_collection()
+    logger.info(f"Received event: {json.dumps(event, indent=2)}")
+    collection_id = event['pathParameters']['collection_id']
+    
+    logger.info("Initializing the collections...")
+    collection = db.collections
 
-    if document := collection.find_one({"_id": ObjectId(creation_id)}):
+    if document := collection.find_one({"_id": ObjectId(collection_id)}):
       return {
         'statusCode': 200,
         'body': json.dumps(document, default=str)  # Convert ObjectId to str
@@ -64,9 +72,35 @@ def read_creation(event, context):
       'statusCode': 500,
       'body': json.dumps({'errorMessage': str(e)})
     }
-def update_creation(event, context):
+    
+def get_collections(event, context):
   try:
-    creation_id = event['pathParameters']['id']
+    logger.info(f"Received event: {json.dumps(event, indent=2)}")
+
+    logger.info("Initializing the collections...")
+    collection = db.collections
+
+    if documents := list(collection.find({})):
+      return {
+        'statusCode': 200,
+        'body': json.dumps(documents, default=str)
+      }
+    else:
+      return {
+        'statusCode': 404,
+        'body': json.dumps({"errorMessage": "No collections found"})
+      }
+  except Exception as e:
+    logger.error(f"An error occurred: {str(e)}")
+    return {
+      'statusCode': 500,
+      'body': json.dumps({'errorMessage': str(e)})
+    }
+
+def update_collection(event, context):
+  try:
+    logger.info(f"Received event: {json.dumps(event, indent=2)}")
+    
     if 'body' not in event or not isinstance(event['body'], str):
       return {
         "statusCode": 400,
@@ -74,9 +108,24 @@ def update_creation(event, context):
       }
 
     update_data = json.loads(event['body'])
-    collection = get_creation_collection()
     
-    result = collection.update_one({"_id": ObjectId(creation_id)}, {"$set": update_data})
+    is_valid, error_response = validate_schema(update_data, update_collection_schema)
+    if not is_valid:
+      return error_response
+    
+    logger.info("Initializing the collections...")
+    collection = db.collections
+    
+    if update_data['collection_name']:
+      if existing_collection := collection.find_one({"collection_name": update_data.get("collection_name")}):
+        return {
+          "statusCode": 400,
+          "body": json.dumps({"errorMessage": "Collection with this name already exists"})
+        }
+    
+    collection_id = update_data['_id']
+    update_data.pop('_id', None)
+    result = collection.update_one({"_id": ObjectId(collection_id)}, {"$set": update_data})
     if result.matched_count:
       return {
         'statusCode': 200,
@@ -94,12 +143,16 @@ def update_creation(event, context):
       'body': json.dumps({'errorMessage': str(e)})
     }
       
-def delete_creation(event, context):
+def delete_collection(event, context):
   try:
-    creation_id = event['pathParameters']['id']
-    collection = get_creation_collection()
+    logger.info(f"Received event: {json.dumps(event, indent=2)}")
     
-    result = collection.delete_one({"_id": ObjectId(creation_id)})
+    collection_id = event['pathParameters']['collection_id']
+    
+    logger.info("Initializing the collections...")
+    collection = db.collections
+    
+    result = collection.delete_one({"_id": ObjectId(collection_id)})
     if result.deleted_count:
       return {
         'statusCode': 200,
